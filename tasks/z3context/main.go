@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 )
@@ -67,11 +68,19 @@ type response struct {
 
 func (s *Service) getOrderByIDWrapper(ctx context.Context, id int64) (*order, error) {
 	out := make(chan response)
-	defer close(out)
 
 	go func(id int64) {
-		o, err := s.getOrderByID(id)
-		out <- response{data: o, err: err}
+		defer close(out)
+		for {
+			select {
+			case <-ctx.Done():
+				log.Println("ctx close")
+				return
+			default:
+				o, err := s.getOrderByID(id)
+				out <- response{data: o, err: err}
+			}
+		}
 	}(id)
 
 	for {
@@ -112,5 +121,7 @@ func main() {
 
 		cancel()
 	}
+
+	fmt.Scan()
 
 }
