@@ -70,20 +70,17 @@ func (s *Service) getOrderByIDWrapper(ctx context.Context, id int64) (*order, er
 	defer close(out)
 
 	go func(id int64) {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			o, err := s.getOrderByID(id)
-			out <- response{data: o, err: err}
-		}
+		o, err := s.getOrderByID(id)
+		out <- response{data: o, err: err}
 	}(id)
 
-	select {
-	case <-ctx.Done():
-		return nil, ErrTimeout
-	case r := <-out:
-		return r.data, r.err
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, ErrTimeout
+		case r := <-out:
+			return r.data, r.err
+		}
 	}
 }
 
