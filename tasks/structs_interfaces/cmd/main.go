@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Marityr/mentor-task/structs_interfaces/src"
+	"github.com/Marityr/mentor-task/tasks/structs_interfaces/src"
 )
 
 func main() {
